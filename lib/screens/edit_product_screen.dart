@@ -17,7 +17,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlController = TextEditingController();
   final _imageUrlFocusNode = FocusNode();
   final _form = GlobalKey<FormState>();
-
   var _editedProduct = Product(
     id: null,
     title: '',
@@ -33,6 +32,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   };
   var _isInit = true;
   var _isLoading = false;
+
   @override
   void initState() {
     _imageUrlFocusNode.addListener(_updateImageUrl);
@@ -93,37 +93,41 @@ class _EditProductScreenState extends State<EditProductScreen> {
       _isLoading = true;
     });
     if (_editedProduct.id != null) {
-      Provider.of<Products>(context, listen: false)
+      await Provider.of<Products>(context, listen: false)
           .updateProduct(_editedProduct.id, _editedProduct);
-      setState(() {
-        _isLoading = false;
-      });
     } else {
       try {
         await Provider.of<Products>(context, listen: false)
             .addProduct(_editedProduct);
       } catch (error) {
-        showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: Text('An error occured'),
-                  content: Text('SomeThing went Wrong'),
-                  actions: [
-                    FlatButton(
-                      child: Text('Okay'),
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                      },
-                    )
-                  ],
-                ));
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-        Navigator.of(context).pop();
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: Text('An error occurred!'),
+                content: Text('Something went wrong.'),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Okay'),
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                  )
+                ],
+              ),
+        );
       }
+      // finally {
+      //   setState(() {
+      //     _isLoading = false;
+      //   });
+      //   Navigator.of(context).pop();
+      // }
     }
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.of(context).pop();
+    // Navigator.of(context).pop();
   }
 
   @override
